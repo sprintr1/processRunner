@@ -16,6 +16,7 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QVector>
 
 #include "processwidget.h"
 
@@ -35,7 +36,7 @@ private:
     unsigned int GetIdleMS();
     
     QLabel*        m_label;
-    ProcessWidget* m_processWidget;
+	QVector<ProcessWidget*> m_processWidgets;
 
 	bool m_idle;
 };

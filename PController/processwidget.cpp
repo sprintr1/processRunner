@@ -16,13 +16,16 @@
 #include <QHBoxLayout>
 #include <QString>
 #include <QFileDialog>
+#include <QSettings>
 
 #include "processwidget.h"
 
-ProcessWidget::ProcessWidget(QWidget *parent)
+ProcessWidget::ProcessWidget(int id, QWidget *parent)
     : QWidget(parent)
+	, m_id(id)
     , m_label(0)
-    , m_lineEdit(0)
+    , m_processLineEdit(0)
+	, m_argLineEdit(0)
     , m_startStopButton(0)
     , m_fileButton(0)
     , m_showLogButton(0)
@@ -31,6 +34,7 @@ ProcessWidget::ProcessWidget(QWidget *parent)
 	, m_idle(false)
 {
     InitGui();
+	LoadSettings();
     ConnectStuff();
 
 	connect(parent, SIGNAL(Idle(bool)),
@@ -70,7 +74,11 @@ ProcessWidget::InitGui()
     
     m_label = new QLabel("Process:", this);
 
-    m_lineEdit = new QLineEdit(this);
+    m_processLineEdit = new QLineEdit(this);
+	m_processLineEdit->setMinimumWidth(400);
+
+	m_argLineEdit = new QLineEdit(this);
+	m_argLineEdit->setMinimumWidth(300);
 
     m_startStopButton = new QPushButton(this);
 	m_startStopButton->setCheckable(true);
@@ -80,7 +88,8 @@ ProcessWidget::InitGui()
     m_showLogButton = new QPushButton("Show Log", this);
     
     lay->addWidget(m_label);
-    lay->addWidget(m_lineEdit);
+    lay->addWidget(m_processLineEdit);
+	lay->addWidget(m_argLineEdit);
     lay->addWidget(m_fileButton);
     lay->addWidget(m_startStopButton);
     lay->addWidget(m_showLogButton);
@@ -100,6 +109,12 @@ ProcessWidget::ConnectStuff()
     
     connect(m_showLogButton, &QPushButton::clicked,
             this, &ProcessWidget::ShowLog);
+
+	connect(m_processLineEdit, &QLineEdit::textChanged,
+		this, &ProcessWidget::SaveSettings);
+
+	connect(m_argLineEdit, &QLineEdit::textChanged,
+		this, &ProcessWidget::SaveSettings);
 }
 
 void
@@ -107,8 +122,8 @@ ProcessWidget::LoadSettings()
 {
 	QSettings settings;
 	settings.beginGroup("Processes");
-	QString process = settings.value(QString("process%1").arg(m_id)).toString();
-	m_lineEdit->setText(process);
+	m_processLineEdit->setText(settings.value(QString("process%1").arg(m_id)).toString());
+	m_argLineEdit->setText(settings.value(QString("arguments%1").arg(m_id)).toString());
 	settings.endGroup();
 }
 
@@ -117,7 +132,8 @@ ProcessWidget::SaveSettings()
 {
 	QSettings settings;
 	settings.beginGroup("Processes");
-	settings.setValue(QString("process%1").arg(m_id), m_lineEdit->text());
+	settings.setValue(QString("process%1").arg(m_id), m_processLineEdit->text());
+	settings.setValue(QString("arguments%1").arg(m_id), m_argLineEdit->text());
 	settings.endGroup();
 }
 
@@ -126,7 +142,7 @@ ProcessWidget::SelectFile()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Select Executable"), "", tr("Executable Files (*.exe)"));
-    m_lineEdit->setText(fileName);
+    m_processLineEdit->setText(fileName);
 }
 
 void
@@ -162,12 +178,11 @@ ProcessWidget::ShowLog()
 void
 ProcessWidget::StartProcess()
 {
-    //QString program = "ccminer -o stratum+tcp://monerohash.com:3333 -u 46zUQXLvkznXpgDNUKWW7RQ2hJUADQaoYFMC7fnJsfoRaUibqN13MVB94tfRDzvnmsZT7RCxQ2nkJUupVJiBkWXB7VDGEma -p x";
-    QString program = m_lineEdit->text();
-    QStringList arguments;
-//    arguments << "-o" << "stratum+tcp://monerohash.com:3333";
-//    arguments << "-u" << "46zUQXLvkznXpgDNUKWW7RQ2hJUADQaoYFMC7fnJsfoRaUibqN13MVB94tfRDzvnmsZT7RCxQ2nkJUupVJiBkWXB7VDGEma";
-//    arguments << "-p" << "QT";
+    QString filePath = m_processLineEdit->text();
+	QFileInfo fileInfo(filePath);
+	QString workingDir = fileInfo.dir().absolutePath();
+
+    QStringList arguments = m_argLineEdit->text().split(QRegExp("\\s+"), QString::SkipEmptyParts);
 
     if(m_process)
     {
@@ -175,6 +190,7 @@ ProcessWidget::StartProcess()
     }
 
     m_process = new QProcess(this);
+	m_process->setWorkingDirectory(workingDir);
     m_process->setReadChannel(QProcess::StandardOutput);
     
     connect (m_process, SIGNAL(readyReadStandardOutput()),
@@ -182,7 +198,7 @@ ProcessWidget::StartProcess()
     connect (m_process, SIGNAL(readyReadStandardError()),
         this, SLOT(PrintError()));
     
-    m_process->start(program, arguments);
+    m_process->start(filePath, arguments);
 	qDebug() << "Started process " << m_process->pid();
 }
 
@@ -199,7 +215,6 @@ ProcessWidget::PrintOutput()
     
     foreach (QString line, strLines){
 		qDebug() << line;
-        std::cerr << line.toStdString() << std::endl;
     }
 }
 
@@ -214,7 +229,7 @@ void ProcessWidget::PrintError()
 	}
  
     foreach (QString line, strLines){
-        std::cerr << line.toStdString() << std::endl;
+		qDebug() << "Error: " << line;
     }
 }
 

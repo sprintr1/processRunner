@@ -23,7 +23,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_label(0)
-    , m_processWidget(0)
 {
     InitGui();
     
@@ -59,10 +58,17 @@ MainWindow::InitGui()
     QVBoxLayout* lay = new QVBoxLayout();
     
     m_label = new QLabel("test", this);
-    m_processWidget = new ProcessWidget(this);
+
+	for (int i = 0; i < 3; i++)
+	{
+		m_processWidgets.append(new ProcessWidget(i, this));
+	}
     
     lay->addWidget(m_label);
-    lay->addWidget(m_processWidget);
+	for (auto processWidget : m_processWidgets)
+	{
+		lay->addWidget(processWidget);
+	}
     lay->addStretch();
     
     QWidget* centralWidget = new QWidget(this);

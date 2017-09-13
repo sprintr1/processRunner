@@ -26,13 +26,14 @@ class ProcessWidget : public QWidget
 {
     Q_OBJECT
 public:
-    ProcessWidget(QWidget *parent = 0);
+    ProcessWidget(int id, QWidget *parent = 0);
     virtual ~ProcessWidget();
 
 protected:
     void timerEvent(QTimerEvent *event);
 
 private slots:
+	void SaveSettings();
     void SelectFile();
     void UpdateProcess();
     void ShowLog();
@@ -43,10 +44,13 @@ private slots:
 private:
     void InitGui();
     void ConnectStuff();
+	void LoadSettings();
     void StartProcess();
     
+	int				m_id;
     QLabel*         m_label;
-    QLineEdit*      m_lineEdit;
+    QLineEdit*      m_processLineEdit;
+	QLineEdit*      m_argLineEdit;
     QPushButton*    m_startStopButton;
     QPushButton*    m_fileButton;
     QPushButton*    m_showLogButton;

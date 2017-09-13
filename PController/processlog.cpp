@@ -193,6 +193,7 @@ ProcessLog::NewMessages(QStringList msgs)
         tf.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
         fPlainTextEdit->setCurrentCharFormat(tf);
 
+		msg.chop(1); //Remove trailing \n
         fPlainTextEdit->appendPlainText(msg);
 
         //Scroll to end
