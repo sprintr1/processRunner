@@ -13,7 +13,7 @@
 #include <QDebug>
 #include <iostream>
 
-#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QString>
 #include <QFileDialog>
 #include <QSettings>
@@ -23,8 +23,9 @@
 ProcessWidget::ProcessWidget(int id, QWidget *parent)
     : QWidget(parent)
 	, m_id(id)
-    , m_label(0)
+    , m_processLabel(0)
     , m_processLineEdit(0)
+	, m_argumentsLabel(0)
 	, m_argLineEdit(0)
     , m_startStopButton(0)
     , m_fileButton(0)
@@ -70,12 +71,14 @@ ProcessWidget::timerEvent(QTimerEvent *)
 void
 ProcessWidget::InitGui()
 {
-    QHBoxLayout* lay = new QHBoxLayout();
+	QGridLayout* lay = new QGridLayout();
     
-    m_label = new QLabel("Process:", this);
+    m_processLabel = new QLabel("Process:", this);
 
     m_processLineEdit = new QLineEdit(this);
 	m_processLineEdit->setMinimumWidth(400);
+
+	m_argumentsLabel = new QLabel("Arguments:", this);
 
 	m_argLineEdit = new QLineEdit(this);
 	m_argLineEdit->setMinimumWidth(300);
@@ -87,15 +90,18 @@ ProcessWidget::InitGui()
     
     m_showLogButton = new QPushButton("Show Log", this);
     
-    lay->addWidget(m_label);
-    lay->addWidget(m_processLineEdit);
-	lay->addWidget(m_argLineEdit);
-    lay->addWidget(m_fileButton);
-    lay->addWidget(m_startStopButton);
-    lay->addWidget(m_showLogButton);
-    lay->addStretch();
+    lay->addWidget(m_processLabel, 0, 0);
+    lay->addWidget(m_processLineEdit, 1, 0);
+	lay->addWidget(m_argumentsLabel, 0, 1);
+	lay->addWidget(m_argLineEdit, 1, 1);
+    lay->addWidget(m_fileButton, 1, 2);
+    lay->addWidget(m_startStopButton, 1, 3);
+    lay->addWidget(m_showLogButton, 1, 4);
     
     this->setLayout(lay);
+
+	m_processLog = new ProcessLog(this);
+	m_processLog->hide();
 }
 
 void
@@ -157,8 +163,10 @@ ProcessWidget::UpdateProcess()
     
 	if(m_process && !run)
     {
-		//Stop the process if 
-		qDebug() << "Ending process " << m_process->pid();
+		QStringList strLines;
+		strLines << QString("Ending process %1\n").arg(QString("0x%1").arg((quintptr)m_process->pid(), QT_POINTER_SIZE * 2, 16, QChar('0')));
+		m_processLog->NewMessages(strLines, true);
+
         m_process->close();
 		m_process->deleteLater();
 		m_process = 0;
@@ -168,10 +176,6 @@ ProcessWidget::UpdateProcess()
 void
 ProcessWidget::ShowLog()
 {
-    if(!m_processLog)
-    {
-        m_processLog = new ProcessLog(this);
-    }
     m_processLog->show();
 }
 
@@ -199,7 +203,9 @@ ProcessWidget::StartProcess()
         this, SLOT(PrintError()));
     
     m_process->start(filePath, arguments);
-	qDebug() << "Started process " << m_process->pid();
+	QStringList strLines;
+	strLines << QString("Starting process %1\n").arg(QString("0x%1").arg((quintptr)m_process->pid(), QT_POINTER_SIZE * 2, 16, QChar('0')));	
+	m_processLog->NewMessages(strLines, true);
 }
 
 void 
@@ -208,14 +214,7 @@ ProcessWidget::PrintOutput()
     QByteArray byteArray = m_process->readAllStandardOutput();
     QStringList strLines = QString(byteArray).split("\n");
     
-	if (m_processLog)
-	{
-		m_processLog->NewMessages(strLines);
-	}
-    
-    foreach (QString line, strLines){
-		qDebug() << line;
-    }
+	m_processLog->NewMessages(strLines, false);
 }
 
 void ProcessWidget::PrintError()
@@ -223,14 +222,7 @@ void ProcessWidget::PrintError()
     QByteArray byteArray = m_process->readAllStandardError();
     QStringList strLines = QString(byteArray).split("\n");
     
-	if (m_processLog)
-	{
-		m_processLog->NewMessages(strLines);
-	}
- 
-    foreach (QString line, strLines){
-		qDebug() << "Error: " << line;
-    }
+	m_processLog->NewMessages(strLines, true);
 }
 
 void ProcessWidget::Idle(bool idle)

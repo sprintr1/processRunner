@@ -35,7 +35,7 @@ public:
 signals:
   
 public slots:
-	void NewMessages(QStringList msgs);
+	void NewMessages(QStringList msgs, bool error);
 
 private slots :
   void RegExpUpdated();
@@ -46,8 +46,8 @@ private slots :
 private: // functions
   void InitGui();
   void RetranslateUi();
-  QWidget* InitLeft();
-  QWidget* InitRight();
+  QWidget* InitTop();
+  QWidget* InitBottom();
 
 private: // member objects
   QLabel *fPlainTextEditLabel;

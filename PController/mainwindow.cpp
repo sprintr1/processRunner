@@ -39,13 +39,13 @@ MainWindow::timerEvent(QTimerEvent *)
 	bool idle = GetIdleMS() > 10000;
 	if(!m_idle && idle)
     {
-        m_label->setText("idle");
+        m_label->setText("Idle");
 		emit Idle(true);
     }
     
 	if(m_idle && !idle)
     {
-        m_label->setText("busy");
+        m_label->setText("Busy");
 		emit Idle(false);
     }
 
@@ -57,7 +57,8 @@ MainWindow::InitGui()
 {
     QVBoxLayout* lay = new QVBoxLayout();
     
-    m_label = new QLabel("test", this);
+    m_label = new QLabel("Busy", this);
+	m_label->setStyleSheet("font: bold 16px;");
 
 	for (int i = 0; i < 3; i++)
 	{

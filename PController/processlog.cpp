@@ -56,22 +56,24 @@ void
 ProcessLog::InitGui()
 {
    QSplitter *splitter = new QSplitter(this);
-   QWidget* left = InitLeft();
-   QWidget* right = InitRight();
-   splitter->addWidget(left);
-   splitter->addWidget(right);
+   splitter->setOrientation(Qt::Vertical);
+   QWidget* top = InitTop();
+   QWidget* bottom = InitBottom();
+   splitter->addWidget(top);
+   splitter->addWidget(bottom);
    QList<int> sizes;
-   sizes.append(left->sizeHint().width());
+   sizes.append(top->sizeHint().width());
    sizes.append(100000);
    splitter->setSizes(sizes);
    QVBoxLayout *lay = new QVBoxLayout;
+   lay->setContentsMargins(0, 0, 0, 0);
    lay->addWidget(splitter);
    this->setLayout(lay);
 }
 
 
 QWidget* 
-ProcessLog::InitLeft()
+ProcessLog::InitTop()
 {
    fRegExpLabel = new QLabel(this);
    fRegExpCombo = new QComboBox(this);
@@ -130,7 +132,7 @@ ProcessLog::InitLeft()
 
 
 QWidget* 
-ProcessLog::InitRight()
+ProcessLog::InitBottom()
 {
    fPlainTextEditLabel = new QLabel(this);
    QHBoxLayout *llay = new QHBoxLayout;
@@ -140,6 +142,7 @@ ProcessLog::InitRight()
    fPlainTextEdit->setReadOnly(true);
    fPlainTextEdit->setWordWrapMode(QTextOption::NoWrap);
    fPlainTextEdit->setMaximumBlockCount(2000);
+   fPlainTextEdit->setMinimumWidth(700);
 
    QVBoxLayout *lay = new QVBoxLayout;
    lay->addLayout(llay);
@@ -170,7 +173,7 @@ ProcessLog::RetranslateUi()
 }
 
 void 
-ProcessLog::NewMessages(QStringList msgs)
+ProcessLog::NewMessages(QStringList msgs, bool error)
 {
     for(auto msg : msgs)
     {
@@ -189,7 +192,12 @@ ProcessLog::NewMessages(QStringList msgs)
         //Set color:
         QTextCharFormat tf;
         tf = fPlainTextEdit->currentCharFormat();
-        tf.setForeground(QBrush(QColor(123011)));
+		QColor color = QColor(Qt::white);
+		if(error)
+		{
+			color = QColor(Qt::magenta);
+		}
+        tf.setForeground(QBrush(color));
         tf.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
         fPlainTextEdit->setCurrentCharFormat(tf);
 

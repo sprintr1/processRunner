@@ -48,8 +48,9 @@ private:
     void StartProcess();
     
 	int				m_id;
-    QLabel*         m_label;
+    QLabel*         m_processLabel;
     QLineEdit*      m_processLineEdit;
+	QLabel*         m_argumentsLabel;
 	QLineEdit*      m_argLineEdit;
     QPushButton*    m_startStopButton;
     QPushButton*    m_fileButton;
