@@ -27,7 +27,7 @@ ProcessWidget::ProcessWidget(int id, QWidget *parent)
     , m_processLineEdit(0)
 	, m_argumentsLabel(0)
 	, m_argLineEdit(0)
-    , m_startStopButton(0)
+	, m_startIdleStopButton(0)
     , m_fileButton(0)
     , m_showLogButton(0)
     , m_processLog(0)
@@ -51,19 +51,22 @@ ProcessWidget::~ProcessWidget()
 void
 ProcessWidget::timerEvent(QTimerEvent *)
 {
+	QColor color(Qt::red);
     if(m_process)
     {
         switch(m_process->state())
         {
-            case QProcess::NotRunning: { m_startStopButton->setText("Start"); } break;
-            case QProcess::Starting:   { m_startStopButton->setText("Starting..."); } break;
-            case QProcess::Running:    { m_startStopButton->setText("Stop"); } break;
+            case QProcess::NotRunning: { color = QColor(Qt::red);    } break;
+            case QProcess::Starting:   { color = QColor(Qt::yellow); } break;
+            case QProcess::Running:    { color = QColor(Qt::green);  } break;
         }
     }
-    else
-    {
-        m_startStopButton->setText("Start");
-    }
+
+	QColor light = color.lighter();
+	QString ss = QString(
+		"background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);"
+	).arg(color.name()).arg(light.name());
+	m_startIdleStopButton->setStyleSheet(ss);
 
 	UpdateProcess();
 }
@@ -83,8 +86,7 @@ ProcessWidget::InitGui()
 	m_argLineEdit = new QLineEdit(this);
 	m_argLineEdit->setMinimumWidth(300);
 
-    m_startStopButton = new QPushButton(this);
-	m_startStopButton->setCheckable(true);
+	m_startIdleStopButton = new StartIdleStopButton(this);
     
     m_fileButton = new QPushButton("...", this);
     
@@ -95,7 +97,7 @@ ProcessWidget::InitGui()
 	lay->addWidget(m_argumentsLabel, 0, 1);
 	lay->addWidget(m_argLineEdit, 1, 1);
     lay->addWidget(m_fileButton, 1, 2);
-    lay->addWidget(m_startStopButton, 1, 3);
+    lay->addWidget(m_startIdleStopButton, 1, 3);
     lay->addWidget(m_showLogButton, 1, 4);
     
     this->setLayout(lay);
@@ -110,7 +112,7 @@ ProcessWidget::ConnectStuff()
     connect(m_fileButton, &QPushButton::clicked,
             this, &ProcessWidget::SelectFile);
     
-    connect(m_startStopButton, &QPushButton::clicked,
+    connect(m_startIdleStopButton, &QPushButton::clicked,
             this, &ProcessWidget::UpdateProcess);
     
     connect(m_showLogButton, &QPushButton::clicked,
@@ -154,7 +156,16 @@ ProcessWidget::SelectFile()
 void
 ProcessWidget::UpdateProcess()
 {
-	bool run = m_idle && m_startStopButton->isChecked();
+	bool run = false;
+	if(m_startIdleStopButton->getState() == Run_idle)
+	{
+		run = m_idle;
+	}
+	if (m_startIdleStopButton->getState() == Run)
+	{
+		run = true;
+	}
+
     if(!m_process && run)
     {
         //Start process:

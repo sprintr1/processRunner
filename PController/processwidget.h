@@ -21,6 +21,7 @@
 #include <QProcess>
 
 #include "processlog.h"
+#include "startidlestopbutton.h"
 
 class ProcessWidget : public QWidget 
 {
@@ -52,7 +53,7 @@ private:
     QLineEdit*      m_processLineEdit;
 	QLabel*         m_argumentsLabel;
 	QLineEdit*      m_argLineEdit;
-    QPushButton*    m_startStopButton;
+	StartIdleStopButton* m_startIdleStopButton;
     QPushButton*    m_fileButton;
     QPushButton*    m_showLogButton;
     

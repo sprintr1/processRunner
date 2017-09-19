@@ -36,7 +36,7 @@ MainWindow::~MainWindow()
 void
 MainWindow::timerEvent(QTimerEvent *)
 {
-	bool idle = GetIdleMS() > 10000;
+	bool idle = GetIdleMS() > 1000*60*2;
 	if(!m_idle && idle)
     {
         m_label->setText("Idle");
