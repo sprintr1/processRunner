@@ -31,8 +31,9 @@
 
 Q_DECLARE_METATYPE(QRegExp::PatternSyntax);
 
-ProcessLog::ProcessLog(QWidget *parent)
+ProcessLog::ProcessLog(int id, QWidget *parent)
    :QDialog(parent)
+	, m_id(id)
     , m_plainTextEdit(0)
     , m_regExpLabel(0)
     , m_regExpEdit(0)
@@ -40,6 +41,7 @@ ProcessLog::ProcessLog(QWidget *parent)
     , m_pauseButton(0)
 {
     InitGui();
+	LoadSettings();
     RetranslateUi();
 }
 
@@ -110,6 +112,24 @@ ProcessLog::RetranslateUi()
     m_pauseButton->setText(m_TEXT_pause);
 }
 
+void
+ProcessLog::LoadSettings()
+{
+	QSettings settings;
+	settings.beginGroup("Processes");
+	m_regExpEdit->setText(settings.value(QString("regexp%1").arg(m_id)).toString());
+	settings.endGroup();
+}
+
+void
+ProcessLog::SaveSettings()
+{
+	QSettings settings;
+	settings.beginGroup("Processes");
+	settings.setValue(QString("regexp%1").arg(m_id), m_regExpEdit->text());
+	settings.endGroup();
+}
+
 void 
 ProcessLog::NewMessages(QStringList msgs, bool error)
 {
@@ -125,7 +145,6 @@ ProcessLog::NewMessages(QStringList msgs, bool error)
 		QRegularExpressionMatch match = m_regularExpression.match(msg);
 		if (match.hasMatch()) {
 			emit SubStringFound(match.captured("ss"));
-			qDebug() << msg << " " << match.captured("ss");
 		}
 
         //Set color:
@@ -155,6 +174,7 @@ ProcessLog::RegExpUpdated()
 {
 	m_regularExpression.setPattern(m_regExpEdit->text());
 	emit SubStringFound("");
+	SaveSettings();
 }
 
 void

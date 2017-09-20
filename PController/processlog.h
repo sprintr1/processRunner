@@ -29,7 +29,7 @@ class ProcessLog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ProcessLog(QWidget *parent = 0);
+    explicit ProcessLog(int id, QWidget *parent = 0);
     ~ProcessLog();
 
 signals:
@@ -46,8 +46,12 @@ private slots :
 private: // functions
     void InitGui();
     void RetranslateUi();
+	void LoadSettings();
+	void SaveSettings();
 
 private: // member objects
+	int m_id;
+
     QPlainTextEdit *m_plainTextEdit;
 
     QLabel* m_regExpLabel;
