@@ -30,6 +30,7 @@ ProcessWidget::ProcessWidget(int id, QWidget *parent)
 	, m_startIdleStopButton(0)
     , m_fileButton(0)
     , m_showLogButton(0)
+	, m_substringStatusLabel(0)
     , m_processLog(0)
     , m_process(0)
 	, m_idle(false)
@@ -91,6 +92,8 @@ ProcessWidget::InitGui()
     m_fileButton = new QPushButton("...", this);
     
     m_showLogButton = new QPushButton("Show Log", this);
+
+	m_substringStatusLabel = new QLabel("Placeholder", this);
     
     lay->addWidget(m_processLabel, 0, 0);
     lay->addWidget(m_processLineEdit, 1, 0);
@@ -99,6 +102,7 @@ ProcessWidget::InitGui()
     lay->addWidget(m_fileButton, 1, 2);
     lay->addWidget(m_startIdleStopButton, 1, 3);
     lay->addWidget(m_showLogButton, 1, 4);
+	lay->addWidget(m_substringStatusLabel, 1, 5);
     
     this->setLayout(lay);
 
@@ -123,6 +127,9 @@ ProcessWidget::ConnectStuff()
 
 	connect(m_argLineEdit, &QLineEdit::textChanged,
 		this, &ProcessWidget::SaveSettings);
+
+	connect(m_processLog, &ProcessLog::SubStringFound,
+		this, &ProcessWidget::SubStringFound);
 }
 
 void
@@ -239,4 +246,10 @@ void ProcessWidget::PrintError()
 void ProcessWidget::Idle(bool idle)
 {
 	m_idle = idle;
+}
+
+void
+ProcessWidget::SubStringFound(QString ss)
+{
+	m_substringStatusLabel->setText(ss);
 }

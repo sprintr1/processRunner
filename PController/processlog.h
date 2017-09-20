@@ -26,47 +26,39 @@
 
 class ProcessLog : public QDialog
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  explicit ProcessLog(QWidget *parent = 0);
-  ~ProcessLog();
+    explicit ProcessLog(QWidget *parent = 0);
+    ~ProcessLog();
 
 signals:
+    void SubStringFound(QString);
   
 public slots:
 	void NewMessages(QStringList msgs, bool error);
 
 private slots :
-  void RegExpUpdated();
-  void RegExpSyntaxUpdated();
-  void ClearLog();
-  void Pause();
+    void RegExpUpdated();
+    void ClearLog();
+    void Pause();
 
 private: // functions
-  void InitGui();
-  void RetranslateUi();
-  QWidget* InitTop();
-  QWidget* InitBottom();
+    void InitGui();
+    void RetranslateUi();
 
 private: // member objects
-  QLabel *fPlainTextEditLabel;
-  QPlainTextEdit *fPlainTextEdit;
+    QPlainTextEdit *m_plainTextEdit;
 
-  QLabel* fRegExpLabel;
-  QComboBox *fRegExpCombo;
-  QLineEdit* fRegExpEdit;
-  QRegExp fRegExp;
+    QLabel* m_regExpLabel;
+    QLineEdit* m_regExpEdit;
+    QRegularExpression m_regularExpression;
 
-  QPushButton* fClearButton;
-  QPushButton* fPauseButton;
+    QPushButton* m_clearButton;
+    QPushButton* m_pauseButton;
 
-  QString fTEXT_messages;
-  QString fTEXT_regExp;
-  QString fTEXT_configure;
-  QString fTEXT_clear;
-  QString fTEXT_pause;
-  QString fTEXT_unpause;
+    QString m_TEXT_pause;
+    QString m_TEXT_unpause;
 };
 
 #endif

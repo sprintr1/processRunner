@@ -30,6 +30,9 @@ public:
     ProcessWidget(int id, QWidget *parent = 0);
     virtual ~ProcessWidget();
 
+public slots:
+	void SubStringFound(QString);
+
 protected:
     void timerEvent(QTimerEvent *event);
 
@@ -56,6 +59,7 @@ private:
 	StartIdleStopButton* m_startIdleStopButton;
     QPushButton*    m_fileButton;
     QPushButton*    m_showLogButton;
+	QLabel*         m_substringStatusLabel;
     
     ProcessLog*     m_processLog;
     
