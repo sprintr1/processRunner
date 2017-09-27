@@ -15,6 +15,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
+#include <QSpinBox>
 #include <QLabel>
 #include <QVector>
 
@@ -28,14 +30,23 @@ public:
     virtual ~MainWindow();
 signals:
 	void Idle(bool);
+	void ShowProcessEdit(bool);
 protected:
     void timerEvent(QTimerEvent *event);
+private slots:
+	void ToggleProcessEdit();
+	void ResizeMe();
 private:
     void InitGui();
     void ConnectStuff();
     unsigned int GetIdleMS();
     
-    QLabel*        m_label;
+	QPushButton*   m_showHideButton;
+	QLabel*        m_minuteLabel;
+	QSpinBox*      m_minuteSpinBox;
+	QLabel*        m_minutesIdleLabel;
+    QLabel*        m_idleStatusLabel;
+
 	QVector<ProcessWidget*> m_processWidgets;
 
 	bool m_idle;

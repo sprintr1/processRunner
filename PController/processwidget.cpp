@@ -25,9 +25,9 @@ ProcessWidget::ProcessWidget(int id, QWidget *parent)
 	, m_id(id)
     , m_processLabel(0)
     , m_processLineEdit(0)
+	, m_processNameLabel(0)
 	, m_argumentsLabel(0)
 	, m_argLineEdit(0)
-	, m_showHideButton(0)
 	, m_startIdleStopButton(0)
     , m_fileButton(0)
     , m_showLogButton(0)
@@ -42,6 +42,9 @@ ProcessWidget::ProcessWidget(int id, QWidget *parent)
 
 	connect(parent, SIGNAL(Idle(bool)),
 		this, SLOT(Idle(bool)));
+
+	connect(parent, SIGNAL(ShowProcessEdit(bool)),
+		this, SLOT(ShowProcessEdit(bool)));
     
     startTimer(100);   // 1-second timer
 }
@@ -83,6 +86,10 @@ ProcessWidget::InitGui()
     m_processLineEdit = new QLineEdit(this);
 	m_processLineEdit->setMinimumWidth(400);
 
+	m_processNameLabel = new QLabel(this);
+	m_processNameLabel->setFixedWidth(70);
+	m_processNameLabel->hide();
+
 	m_argumentsLabel = new QLabel("Arguments:", this);
 
 	m_argLineEdit = new QLineEdit(this);
@@ -90,25 +97,23 @@ ProcessWidget::InitGui()
 
 	m_startIdleStopButton = new StartIdleStopButton(this);
 
-	m_showHideButton = new QPushButton("<", this);
-	m_showHideButton->setCheckable(true);
-	m_showHideButton->setMaximumWidth(22);
-    
     m_fileButton = new QPushButton("...", this);
     
     m_showLogButton = new QPushButton("Show Log", this);
 
 	m_substringStatusLabel = new QLabel(this);
     
-	lay->addWidget(m_showHideButton, 1, 0);
-    lay->addWidget(m_processLabel, 0, 1);
-    lay->addWidget(m_processLineEdit, 1, 1);
-	lay->addWidget(m_argumentsLabel, 0, 2);
-	lay->addWidget(m_argLineEdit, 1, 2);
-    lay->addWidget(m_fileButton, 1, 3);
-    lay->addWidget(m_startIdleStopButton, 1, 4);
-    lay->addWidget(m_showLogButton, 1, 5);
-	lay->addWidget(m_substringStatusLabel, 1, 6);
+    lay->addWidget(m_processLabel, 0, 0);
+
+    lay->addWidget(m_processLineEdit, 1, 0);
+	lay->addWidget(m_processNameLabel, 1, 0);
+
+	lay->addWidget(m_argumentsLabel, 0, 1);
+	lay->addWidget(m_argLineEdit, 1, 1);
+    lay->addWidget(m_fileButton, 1, 2);
+    lay->addWidget(m_startIdleStopButton, 1, 3);
+    lay->addWidget(m_showLogButton, 1, 4);
+	lay->addWidget(m_substringStatusLabel, 1, 5);
     
     this->setLayout(lay);
 
@@ -122,9 +127,6 @@ ProcessWidget::ConnectStuff()
     connect(m_fileButton, &QPushButton::clicked,
             this, &ProcessWidget::SelectFile);
 
-	connect(m_showHideButton, &QPushButton::clicked,
-		this, &ProcessWidget::ToggleHideEdit);
-    
     connect(m_startIdleStopButton, &QPushButton::clicked,
             this, &ProcessWidget::UpdateProcess);
 
@@ -176,25 +178,30 @@ ProcessWidget::SelectFile()
 }
 
 void
-ProcessWidget::ToggleHideEdit()
+ProcessWidget::ShowProcessEdit(bool hidden)
 {
-	if (m_showHideButton->isChecked())
+	if (hidden)
 	{
-		m_showHideButton->setText(">");
 		m_processLabel->hide();
 		m_processLineEdit->hide();
 		m_argLineEdit->hide();
 		m_argumentsLabel->hide();
 		m_fileButton->hide();
+
+		QString filePath = m_processLineEdit->text();
+		QFileInfo fileInfo(filePath);
+		m_processNameLabel->setText(fileInfo.baseName());
+		m_processNameLabel->show();
 	}
 	else
 	{
-		m_showHideButton->setText("<");
 		m_processLabel->show();
 		m_processLineEdit->show();
 		m_argLineEdit->show();
 		m_argumentsLabel->show();
 		m_fileButton->show();
+
+		m_processNameLabel->hide();
 	}
 
 	adjustSize();

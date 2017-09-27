@@ -39,7 +39,7 @@ protected:
 private slots:
 	void SaveSettings();
     void SelectFile();
-	void ToggleHideEdit();
+	void ShowProcessEdit(bool);
     void UpdateProcess();
     void ShowLog();
     void PrintOutput();
@@ -55,10 +55,10 @@ private:
 	int				m_id;
     QLabel*         m_processLabel;
     QLineEdit*      m_processLineEdit;
+	QLabel*         m_processNameLabel;
 	QLabel*         m_argumentsLabel;
 	QLineEdit*      m_argLineEdit;
 	StartIdleStopButton* m_startIdleStopButton;
-	QPushButton*    m_showHideButton;
     QPushButton*    m_fileButton;
     QPushButton*    m_showLogButton;
 	QLabel*         m_substringStatusLabel;
