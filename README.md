@@ -1,0 +1,1 @@
+This is a Qt program that allows the user to run processes when the computer is idle. It has a graphical user interface where the user can inspect the process logs and configure the time before the processes are launched. 
